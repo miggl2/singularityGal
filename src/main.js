@@ -24,6 +24,7 @@ const DROP_OFFSET = 190;
 const ROTATE_STEP = Math.PI / 12;
 const FIXED_DT = 1000 / 60;
 const DEBUG = new URLSearchParams(window.location.search).has('debug');
+const BASE_URL = import.meta.env.BASE_URL;
 
 const state = {
   blocks: [],
@@ -76,7 +77,7 @@ function resizeCanvas() {
 }
 
 async function loadGameAssets() {
-  const response = await fetch('/assets/blocks.json');
+  const response = await fetch(assetUrl('assets/blocks.json'));
   state.blocks = await response.json();
 
   await Promise.all(
@@ -89,10 +90,15 @@ async function loadGameAssets() {
             resolve();
           };
           image.onerror = reject;
-          image.src = block.src;
+          image.src = assetUrl(block.src);
         }),
     ),
   );
+}
+
+function assetUrl(path) {
+  const normalized = path.replace(/^\/+/, '');
+  return new URL(normalized, window.location.origin + BASE_URL).toString();
 }
 
 function makeEngine() {
